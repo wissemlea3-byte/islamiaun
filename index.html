@@ -53,24 +53,22 @@ small{color:var(--muted)} footer{text-align:center;color:#64736a;padding:12px 0 
  </div>
  <div class="info">📌 أجب عن جميع الأسئلة دون الاستعانة بالدرس. اختر إجابة واحدة لكل سؤال، ثم اضغط «إنهاء الاختبار» للحصول على علامتك وتقرير مفصل يوضح ما يجب مراجعته.</div>
 </section>
-<div class="progressbox">
- <div class="stats"><span id="answered">أجبت عن 0 من 27</span><span id="percent">0%</span></div>
- <div class="progress"><div class="bar" id="bar"></div></div>
-</div>
+<section class="panel">
+ <div class="field"><label for="student">اسم التلميذ</label><input id="student" type="text" placeholder="اكتب اسمك هنا"></div>
+ <div class="info">📌 كل سؤال يظهر في صفحة مستقلة. ستجد نوعين من الأسئلة: اختيار الإجابة الصحيحة، وصحيح أو خطأ. أجب ثم انتقل إلى السؤال التالي، ويمكنك الرجوع لتعديل إجاباتك.</div>
+</section>
 <form id="quiz">
-<div class="panel">
- <h2 class="section-title"><span>💗</span> الدرس الأول: الاحترام</h2>
- <div id="respect"></div>
+<div class="panel" id="questionPanel">
+ <div class="stats"><span id="topicLabel">الدرس الأول: الاحترام</span><span id="qCounter">السؤال 1 من 27</span></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+ <div id="oneQuestion"></div>
+ <div class="actions">
+  <button type="button" class="secondary" id="prevBtn">السابق</button>
+  <button type="button" class="primary" id="nextBtn">التالي</button>
+  <button type="submit" class="primary" id="finishBtn" style="display:none">إنهاء الاختبار وتصحيح الإجابات ✓</button>
+ </div>
+ <small>اختر إجابة واحدة، ثم انتقل إلى السؤال التالي. يمكنك الرجوع لتغيير إجابتك قبل الإنهاء.</small>
 </div>
-<div class="panel">
- <h2 class="section-title"><span>🚪</span> الدرس الثاني: الاستئذان</h2>
- <div id="permission"></div>
-</div>
-<div class="panel">
- <h2 class="section-title"><span>🕋</span> الدرس الثالث: فتح مكة</h2>
- <div id="mecca"></div>
-</div>
-<div class="actions"><button type="submit" class="primary">إنهاء الاختبار وتصحيح الإجابات ✓</button><button type="reset" class="secondary">مسح الإجابات</button></div>
 </form>
 <section class="panel" id="result">
  <h2 class="section-title"><span>🏆</span> نتيجتك وتقييم مستواك</h2>
@@ -122,63 +120,92 @@ mecca:[
 ["ما العبرة المتعلقة بالنصر التي نستخلصها من فتح مكة؟",["النصر من عند الله، ويجب شكره","النصر بالقوة وحدها","النصر لا يحتاج إلى تواضع","النصر سبب للتكبر"],0,"العبر المستخلصة"]
 ]};
 const labels={respect:"الاحترام",permission:"الاستئذان",mecca:"فتح مكة"};
-const host={respect:document.getElementById('respect'),permission:document.getElementById('permission'),mecca:document.getElementById('mecca')};
 let flat=[];
-Object.entries(data).forEach(([topic,qs])=>qs.forEach((q,i)=>flat.push({topic,q,i})));
+Object.entries(data).forEach(([topic,qs])=>qs.forEach((q,i)=>{
+ let item={topic,q,i,type:"choice"};
+ // Change a balanced selection into true/false statements, keeping the lesson facts.
+ const tfStatements={
+  "respect-0":["الاحترام هو إظهار التقدير لأفراد الأسرة وإعطاء كل فرد القيمة والمكانة التي يستحقها.",true],
+  "respect-2":["نهى الله تعالى عن قول «أفّ» للوالدين.",true],
+  "respect-5":["من احترام الإخوة والأخوات تجنب الظلم والاستهزاء والإساءة إليهم.",true],
+  "respect-8":["الحديث الشريف يحث على الرحمة بالصغير ومعرفة حق الكبير.",true],
+  "permission-0":["الاستئذان هو طلب الإذن قبل الدخول على أفراد الأسرة أو استعمال أشيائهم الخاصة.",true],
+  "permission-1":["يستأذن المسلم قبل الدخول خمس مرات.",false],
+  "permission-2":["إذا لم يؤذن للزائر بعد ثلاث مرات فإنه يرجع.",true],
+  "permission-7":["من آداب الاستئذان الوقوف مقابل الباب مباشرة.",false],
+  "mecca-2":["كان السبب الرئيسي لفتح مكة نقض قريش معاهدة صلح الحديبية.",true],
+  "mecca-3":["وقع فتح مكة في السنة الثامنة من الهجرة.",true],
+  "mecca-4":["جمع النبي ﷺ عشرة آلاف مقاتل لفتح مكة.",true],
+  "mecca-6":["دخل الجيش الفاتح مكة من جهاتها الأربع دون قتال.",true],
+  "mecca-8":["من نتائج فتح مكة تطهير الكعبة من مظاهر الشرك والوثنية.",true],
+  "mecca-11":["كان من دروس فتح مكة عفو الرسول ﷺ عن أهل مكة.",true]
+ };
+ const key=topic+"-"+i;
+ if(tfStatements[key]) item={...item,type:"tf",statement:tfStatements[key][0],tfAnswer:tfStatements[key][1]};
+ flat.push(item);
+}));
 const total=flat.length;
-flat.forEach((item,n)=>{
- const [question,opts,answer,skill]=item.q;
- const box=document.createElement('div');box.className='q';
- box.innerHTML=`<h3><span class="num">س${n+1}.</span> ${question}</h3><div class="options">${opts.map((o,j)=>`<label class="option"><input type="radio" name="q${n}" value="${j}"><span>${o}</span></label>`).join('')}</div>`;
- host[item.topic].appendChild(box);
-});
-function updateProgress(){
- let count=flat.filter((_,i)=>document.querySelector(`input[name="q${i}"]:checked`)).length;
- document.getElementById('answered').textContent=`أجبت عن ${count} من ${total}`;
- document.getElementById('percent').textContent=Math.round(count/total*100)+'%';
- document.getElementById('bar').style.width=(count/total*100)+'%';
+let current=0, submitted=false;
+const answers={};
+const one=document.getElementById('oneQuestion');
+function selected(index){return Object.prototype.hasOwnProperty.call(answers,index)?{value:String(answers[index])}:null}
+function renderQuestion(){
+ const item=flat[current], q=item.q;
+ document.getElementById('topicLabel').textContent="الدرس: "+labels[item.topic];
+ document.getElementById('qCounter').textContent=`السؤال ${current+1} من ${total}`;
+ document.getElementById('bar').style.width=((current+1)/total*100)+'%';
+ let body='';
+ if(item.type==="tf"){
+  body=`<h2 style="font-size:21px;margin:18px 0"> <span class="num">س${current+1}.</span> ${item.statement}</h2>
+  <div class="options">
+   <label class="option"><input type="radio" name="q${current}" value="1"><span>صحيح</span></label>
+   <label class="option"><input type="radio" name="q${current}" value="0"><span>خطأ</span></label>
+  </div><div class="info">نوع السؤال: صحيح أم خطأ</div>`;
+ }else{
+  body=`<h2 style="font-size:21px;margin:18px 0"><span class="num">س${current+1}.</span> ${q[0]}</h2>
+  <div class="options">${q[1].map((o,j)=>`<label class="option"><input type="radio" name="q${current}" value="${j}"><span>${o}</span></label>`).join('')}</div><div class="info">نوع السؤال: اختر الإجابة الصحيحة</div>`;
+ }
+ one.innerHTML=`<div class="q" style="min-height:260px">${body}</div>`;
+ const old=selected(current);
+ if(old){const radio=document.querySelector(`input[name="q${current}"][value="${old.value}"]`);if(radio)radio.checked=true;}
+ one.querySelectorAll(`input[name="q${current}"]`).forEach(r=>r.addEventListener('change',()=>{answers[current]=Number(r.value)}));
+ document.getElementById('prevBtn').disabled=current===0;
+ document.getElementById('nextBtn').style.display=current===total-1?'none':'inline-block';
+ document.getElementById('finishBtn').style.display=current===total-1?'inline-block':'none';
 }
-document.getElementById('quiz').addEventListener('change',updateProgress);
+document.getElementById('prevBtn').addEventListener('click',()=>{if(current>0){current--;renderQuestion()}});
+document.getElementById('nextBtn').addEventListener('click',()=>{
+ if(!selected(current)){alert('يرجى اختيار إجابة قبل الانتقال إلى السؤال التالي.');return}
+ if(current<total-1){current++;renderQuestion()}
+});
 document.getElementById('quiz').addEventListener('submit',e=>{
  e.preventDefault();
- const missing=flat.filter((_,i)=>!document.querySelector(`input[name="q${i}"]:checked`)).length;
+ const missing=flat.filter((_,i)=>!selected(i)).length;
  if(missing && !confirm(`ما زال هناك ${missing} سؤال/أسئلة دون إجابة. هل تريد التصحيح الآن؟`))return;
  const results={};Object.keys(data).forEach(k=>results[k]={correct:0,total:data[k].length,missed:[]});
  let correct=0;
  flat.forEach((item,n)=>{
-  const chosen=document.querySelector(`input[name="q${n}"]:checked`);
-  const got=chosen?Number(chosen.value):-1, expected=item.q[2];
+  const chosen=selected(n), got=chosen?Number(chosen.value):-1;
+  const expected=item.type==="tf"?(item.tfAnswer?1:0):item.q[2];
+  const opts=item.type==="tf"?["خطأ","صحيح"]:item.q[1];
   const ok=got===expected;if(ok){correct++;results[item.topic].correct++}
-  results[item.topic].missed.push({n:n+1,question:item.q[0],chosen:got<0?"لم تتم الإجابة":item.q[1][got],right:item.q[1][expected],skill:item.q[3],ok});
+  results[item.topic].missed.push({n:n+1,question:item.type==="tf"?item.statement:item.q[0],chosen:got<0?"لم تتم الإجابة":opts[got],right:opts[expected],skill:item.q[3],ok});
  });
- const mark=correct/total*20, name=document.getElementById('student').value.trim()||'التلميذ';
+ const mark=correct/total*20, name=document.getElementById('student')?.value.trim()||'التلميذ';
  document.getElementById('scoreArea').innerHTML=`<div class="score"><div class="circle">${mark.toFixed(2)}<small>/20</small></div><div><h2 style="margin:0">${name}</h2><strong>${correct} إجابة صحيحة من ${total}</strong><p>${mark>=17?'ممتاز! إتقان رائع 🌟':mark>=14?'جيد جداً، واصل المراجعة 👏':mark>=10?'مستوى متوسط، تحتاج إلى تثبيت بعض المعلومات 📖':'تحتاج إلى مراجعة مركزة وإعادة الحفظ 💪'}</p></div></div>`;
  let topicsHTML='',reviewHTML='';
  Object.entries(results).forEach(([key,r])=>{
   const pct=Math.round(r.correct/r.total*100),status=pct>=80?'متقن':pct>=60?'يحتاج إلى تثبيت':'يحتاج إلى مراجعة وإعادة حفظ';
   topicsHTML+=`<div class="topic"><div class="topichead"><span>${labels[key]}</span><span>${r.correct}/${r.total} — ${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div><span class="${pct>=80?'good':'weak'}">${status}</span></div>`;
-  if(pct<80){
-   let skills=[...new Set(r.missed.map(x=>x.skill))];
-   reviewHTML+=`<div class="review"><strong>${labels[key]} (${pct}%)</strong><br>راجع وأعد حفظ: ${skills.join('، ')}.<br><small>أخطأت في ${r.missed.length} سؤالاً من هذا الدرس.</small></div>`;
-  }
+  if(pct<80){let skills=[...new Set(r.missed.filter(x=>!x.ok).map(x=>x.skill))];reviewHTML+=`<div class="review"><strong>${labels[key]} (${pct}%)</strong><br>راجع وأعد حفظ: ${skills.join('، ')}.<br><small>أخطأت في ${r.missed.filter(x=>!x.ok).length} سؤالاً من هذا الدرس.</small></div>`;}
  });
  if(!reviewHTML)reviewHTML='<p class="good">أحسنت! حققت 80% أو أكثر في جميع الدروس. قم بمراجعة خفيفة للمحافظة على الحفظ.</p>';
- document.getElementById('topicArea').innerHTML=topicsHTML;
- document.getElementById('reviewArea').innerHTML=reviewHTML;
+ document.getElementById('topicArea').innerHTML=topicsHTML;document.getElementById('reviewArea').innerHTML=reviewHTML;
  let details='';
- flat.forEach((item,n)=>{
-  const r=results[item.topic].missed.find(x=>x.n===n+1);
-  if(!r.ok)details+=`<div class="topic"><strong>س${n+1} — ${labels[item.topic]}</strong><p>${r.question}</p><div class="wrong">إجابتك: ${r.chosen}</div><div class="correct">الإجابة الصحيحة: ${r.right}</div><small>المحور: ${r.skill}</small></div>`;
- });
+ flat.forEach((item,n)=>{const r=results[item.topic].missed.find(x=>x.n===n+1);if(!r.ok)details+=`<div class="topic"><strong>س${n+1} — ${labels[item.topic]}</strong><p>${r.question}</p><div class="wrong">إجابتك: ${r.chosen}</div><div class="correct">الإجابة الصحيحة: ${r.right}</div><small>المحور: ${r.skill}</small></div>`;});
  document.getElementById('details').innerHTML=details||'<p class="good">كل إجاباتك صحيحة! لا توجد أخطاء.</p>';
- document.getElementById('result').style.display='block';
- document.getElementById('result').scrollIntoView({behavior:'smooth'});
+ document.getElementById('result').style.display='block';document.getElementById('questionPanel').style.display='none';document.getElementById('result').scrollIntoView({behavior:'smooth'});
 });
-function retry(){
- document.getElementById('quiz').reset();document.getElementById('result').style.display='none';updateProgress();window.scrollTo({top:0,behavior:'smooth'});
-}
-document.getElementById('quiz').addEventListener('reset',()=>setTimeout(updateProgress,0));
-updateProgress();
-</script>
-</body>
-</html>
+function retry(){Object.keys(answers).forEach(k=>delete answers[k]);document.getElementById('quiz').reset();document.getElementById('result').style.display='none';document.getElementById('questionPanel').style.display='block';current=0;renderQuestion();window.scrollTo({top:0,behavior:'smooth'});}
+renderQuestion();
+                                                        </script>
