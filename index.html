@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منصة اختبار التربية الإسلامية</title>
+<style>
+:root{--green:#176b45;--mint:#eaf5ed;--gold:#f4d77a;--ink:#20252a;--muted:#68737d;--red:#b8324b}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#e8f3eb,#fff8e5);font-family:Tahoma,Arial,sans-serif;color:var(--ink);line-height:1.8}
+header{background:linear-gradient(120deg,#155b3b,#23835a);color:white;padding:28px 16px;text-align:center}
+header h1{margin:0;font-size:clamp(24px,5vw,38px)} header p{margin:6px 0 0;color:#e6f4e9}
+.wrap{max-width:980px;margin:22px auto;padding:0 14px}
+.panel{background:white;border:1px solid #dbe7dc;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 5px 18px #173d2610}
+.topline{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:210px} label{display:block;font-weight:bold;margin-bottom:5px}
+input[type=text]{width:100%;padding:12px;border:1px solid #cbd8ce;border-radius:10px;font:inherit}
+.info{background:#fff8df;border-right:5px solid #e3bd42;padding:12px 15px;border-radius:10px;margin-top:14px}
+.progressbox{position:sticky;top:0;z-index:5;background:#ffffffed;padding:10px 0;backdrop-filter:blur(8px)}
+.progress{height:10px;background:#e5ece6;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:#23835a;transition:.25s}
+.stats{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:6px}
+.section-title{display:flex;align-items:center;gap:10px;color:#176b45;border-bottom:2px solid #e8f0e9;padding-bottom:8px;margin:8px 0 16px}
+.section-title span{background:#e9f4ec;border-radius:50%;width:35px;height:35px;display:grid;place-items:center}
+.q{border:1px solid #e2e9e3;border-radius:14px;padding:15px;margin:12px 0;background:#fff}
+.q h3{font-size:17px;margin:0 0 10px}.num{color:#188052;font-weight:bold}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.option{display:flex;gap:8px;align-items:flex-start;border:1px solid #e0e8e1;border-radius:10px;padding:9px 11px;cursor:pointer;transition:.15s}
+.option:hover{background:#f2f8f3;border-color:#83b895}.option input{margin-top:7px;accent-color:#176b45}
+.option:has(input:checked){background:#eaf5ed;border-color:#55a477}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+button{border:0;border-radius:11px;padding:12px 20px;font:inherit;font-weight:bold;cursor:pointer}
+.primary{background:#176b45;color:white}.secondary{background:#edf2ee;color:#254532}.primary:hover{background:#105536}
+button:disabled{opacity:.5;cursor:not-allowed}
+#result{display:none}
+.score{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#eff8f0;border-radius:14px;padding:16px}
+.circle{width:100px;height:100px;border-radius:50%;display:grid;place-items:center;background:white;border:7px solid #6ab184;font-size:25px;font-weight:bold;color:#176b45}
+.topic{margin:12px 0;padding:13px;border:1px solid #e0e9e1;border-radius:12px}
+.topichead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:bold}
+.track{height:9px;background:#edf0ed;border-radius:20px;margin:8px 0;overflow:hidden}.fill{height:100%;background:#2d9460}
+.good{color:#187247}.weak{color:#b8324b}.review{background:#fff5f3;border-right:4px solid #c65a5a;padding:12px;border-radius:10px;margin:8px 0}
+.correct{color:#187247;font-weight:bold}.wrong{color:#b8324b;font-weight:bold}
+small{color:var(--muted)} footer{text-align:center;color:#64736a;padding:12px 0 28px}
+@media(max-width:600px){.options{grid-template-columns:1fr}.panel{padding:14px}.q h3{font-size:16px}}
+@media print{body{background:white}.progressbox,.actions,header p{display:none!important}.panel{box-shadow:none;break-inside:avoid}#result{display:block!important}}
+</style>
+</head>
+<body>
+<header><h1>🌿 منصة اختبار التربية الإسلامية</h1><p>اختبر فهمك وحفظك في دروس: الاحترام • الاستئذان • فتح مكة</p></header>
+<div class="wrap">
+<section class="panel">
+ <div class="topline">
+  <div class="field"><label for="student">اسم التلميذ</label><input id="student" type="text" placeholder="اكتب اسمك هنا"></div>
+  <div class="field"><label>عدد الأسئلة</label><div style="padding:10px 0;font-weight:bold;color:#176b45">27 سؤالاً • علامة على 20</div></div>
+ </div>
+ <div class="info">📌 أجب عن جميع الأسئلة دون الاستعانة بالدرس. اختر إجابة واحدة لكل سؤال، ثم اضغط «إنهاء الاختبار» للحصول على علامتك وتقرير مفصل يوضح ما يجب مراجعته.</div>
+</section>
+<div class="progressbox">
+ <div class="stats"><span id="answered">أجبت عن 0 من 27</span><span id="percent">0%</span></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+</div>
+<form id="quiz">
+<div class="panel">
+ <h2 class="section-title"><span>💗</span> الدرس الأول: الاحترام</h2>
+ <div id="respect"></div>
+</div>
+<div class="panel">
+ <h2 class="section-title"><span>🚪</span> الدرس الثاني: الاستئذان</h2>
+ <div id="permission"></div>
+</div>
+<div class="panel">
+ <h2 class="section-title"><span>🕋</span> الدرس الثالث: فتح مكة</h2>
+ <div id="mecca"></div>
+</div>
+<div class="actions"><button type="submit" class="primary">إنهاء الاختبار وتصحيح الإجابات ✓</button><button type="reset" class="secondary">مسح الإجابات</button></div>
+</form>
+<section class="panel" id="result">
+ <h2 class="section-title"><span>🏆</span> نتيجتك وتقييم مستواك</h2>
+ <div id="scoreArea"></div>
+ <h3>📚 تقييم كل درس</h3><div id="topicArea"></div>
+ <h3>🧠 ما الذي تحتاج إلى مراجعته؟</h3><div id="reviewArea"></div>
+ <h3>🔎 تصحيح الأسئلة</h3><div id="details"></div>
+ <div class="actions"><button class="primary" onclick="window.print()">طباعة التقييم</button><button class="secondary" onclick="retry()">إعادة الاختبار</button></div>
+</section>
+<footer>بالتوفيق والنجاح 🌸 — التربية الإسلامية</footer>
+</div>
+<script>
+const data = {
+respect:[
+["ما المقصود بالاحترام حسب الدرس؟",["إظهار التقدير لأفراد الأسرة وإعطاء كل فرد قيمته ومكانته","الخوف من أفراد الأسرة","طاعة الأصدقاء فقط","عدم التحدث مع الآخرين"],0,"تعريف الاحترام"],
+["في الآيتين 23 و24 من سورة الإسراء، أوصى الله تعالى بالإحسان إلى:",["الجيران فقط","الوالدين","الأصدقاء","المعلمين فقط"],1,"الآيات القرآنية"],
+["ما العبارة التي نهى الله تعالى عن قولها للوالدين؟",["شكراً","أفّ","جزاك الله خيراً","السلام عليكم"],1,"الآيات القرآنية"],
+["كيف أمرنا الله أن نخاطب الوالدين؟",["بصوت مرتفع","بقول كريم","بإهمال","بكلام ساخر"],1,"الآيات القرآنية"],
+["ما معنى قوله تعالى: «واخفض لهما جناح الذل من الرحمة»؟",["التكبر عليهما","التواضع والرحمة بهما","ترك مساعدتهما","مجادلتهما دائماً"],1,"الآيات القرآنية"],
+["أي سلوك يدل على احترام الإخوة والأخوات؟",["السخرية منهم","احتقارهم","تجنب الظلم والاستهزاء والإساءة إليهم","إفشاء أسرارهم"],2,"احترام أفراد الأسرة"],
+["كيف يكون الحوار القائم على تبادل الأفكار؟",["بمقاطعة المخالف","باحترام الرأي المخالف","بالصراخ","برفض الاستماع"],1,"الحوار واحترام الرأي"],
+["أكمل معنى الحديث: «ليس منا من لم يرحم صغيرنا ويعرف حق…»",["صديقنا","كبيرنا","جارنا","ضيفنا"],1,"الحديث الشريف"],
+["احترام الكبار والرحمة بالصغار من أخلاق المسلم.",["صحيح","خطأ"],0,"الحديث الشريف"]
+],
+permission:[
+["ما المقصود بالاستئذان؟",["الدخول دون إعلام","طلب الإذن في الدخول على أفراد الأسرة واستعمال أشيائهم الخاصة","رفع الصوت عند الباب","مغادرة البيت دون إخبار"],1,"تعريف الاستئذان"],
+["كم مرة يستأذن المسلم قبل الدخول؟",["مرة واحدة","مرتين","ثلاث مرات","خمس مرات"],2,"الحديث الشريف"],
+["ماذا يفعل المسلم إذا لم يؤذن له بعد الاستئذان ثلاث مرات؟",["يدخل بالقوة","ينتظر طوال اليوم","يرجع","يطرق الباب بعنف"],2,"الحديث الشريف"],
+["من راوي حديث «الاستئذان ثلاث» الوارد في الدرس؟",["أبو موسى الأشعري رضي الله عنه","أبو هريرة رضي الله عنه","عمر بن الخطاب رضي الله عنه","أنس بن مالك رضي الله عنه"],0,"الحديث الشريف"],
+["متى يستحسن استئذان الوالدين؟",["قبل الدخول عليهما، وخاصة في أوقات الراحة","بعد الدخول","لا حاجة للاستئذان","فقط أمام الضيوف"],0,"آداب الاستئذان"],
+["قبل الدخول على الإخوة والأخوات في غرفهم ينبغي:",["الدخول مباشرة","الاستئذان","فتح الباب بالقوة","مناداتهم بسخرية"],1,"آداب الاستئذان"],
+["إذا لم يؤذن لك بعد ثلاث مرات، فماذا تفعل؟",["تعود مرة أخرى في وقت لاحق","تدخل رغم الرفض","تغضب وتصرخ","تبقى أمام الباب"],0,"آداب الاستئذان"],
+["أين تقف عند الباب عند الاستئذان؟",["مقابل الباب مباشرة","على أحد جانبيه الأيمن أو الأيسر","خلف الباب ملاصقاً له","بعيداً جداً بحيث لا يسمعك أحد"],1,"آداب الاستئذان"],
+["إذا أردت القيام بعمل مفيد خارج البيت، فمن الأدب أن:",["تخرج دون إخبار","تطلب الإذن من والدك وتتجنب التأخر في الرجوع","تخبر أصدقاءك فقط","تعود متى شئت دون مراعاة"],1,"آداب الاستئذان"]
+],
+mecca:[
+["في أي سورة وردت الآية «إنا فتحنا لك فتحاً مبيناً»؟",["سورة النصر","سورة الفتح","سورة الإسراء","سورة التوبة"],1,"السند القرآني"],
+["بماذا يبدأ نص سورة النصر الوارد في الدرس؟",["إذا جاء نصر الله والفتح","إنا فتحنا لك فتحاً مبيناً","سبح بحمد ربك","والضحى"],0,"السند القرآني"],
+["ما السبب الرئيسي لفتح مكة حسب الدرس؟",["انتصار الروم","نقض قريش معاهدة صلح الحديبية","طلب أهل مكة الحرب","هجرة المسلمين إلى الحبشة"],1,"سبب فتح مكة"],
+["في أي سنة هجرية كان فتح مكة؟",["السنة الثانية","السنة الخامسة","السنة الثامنة","السنة العاشرة"],2,"سبب فتح مكة"],
+["كم بلغ عدد المقاتلين الذين جمعهم النبي ﷺ لفتح مكة؟",["ألف مقاتل","ثلاثة آلاف","عشرة آلاف","عشرون ألفاً"],2,"الاستعداد لفتح مكة"],
+["إلى أين توجه الجيش الإسلامي قبل فتح مكة؟",["الظهران بالقرب من مكة","المدينة القديمة","الطائف","بدر"],0,"الاستعداد لفتح مكة"],
+["كيف دخل الجيش الفاتح مكة حسب الدرس؟",["من جهة واحدة بعد قتال طويل","من جهاتها الأربع دون قتال","سراً في الليل فقط","بعد انسحابه"],1,"أحداث فتح مكة"],
+["كيف دخل الرسول ﷺ مكة؟",["متكبراً منتقماً","خاشعاً متضرعاً لله","خائفاً من أهلها","رافضاً دخولها"],1,"أحداث فتح مكة"],
+["ما أبرز عمل قام به المسلمون في الكعبة بعد الفتح؟",["ترك الأصنام","تحطيم الأصنام وإعلان التوحيد","إغلاق الكعبة","نقل الكعبة"],1,"نتائج فتح مكة"],
+["ما النتيجة التي ترتبت على فتح مكة بالنسبة إلى الناس؟",["ابتعاد الناس عن الإسلام","دخول الناس في دين الله أفواجاً","انتهاء الدعوة","عودة عبادة الأصنام"],1,"نتائج فتح مكة"],
+["ما المقصود بتطهير الكعبة؟",["تزيينها بالأصنام","إزالة مظاهر الشرك والوثنية منها","منع الصلاة فيها","هدمها"],1,"نتائج فتح مكة"],
+["ما الخلق الذي ظهر في عفو الرسول ﷺ عن أهل مكة؟",["الانتقام","العفو والتسامح","التكبر","القسوة"],1,"العبر المستخلصة"],
+["ما العبرة المتعلقة بالنصر التي نستخلصها من فتح مكة؟",["النصر من عند الله، ويجب شكره","النصر بالقوة وحدها","النصر لا يحتاج إلى تواضع","النصر سبب للتكبر"],0,"العبر المستخلصة"]
+]};
+const labels={respect:"الاحترام",permission:"الاستئذان",mecca:"فتح مكة"};
+const host={respect:document.getElementById('respect'),permission:document.getElementById('permission'),mecca:document.getElementById('mecca')};
+let flat=[];
+Object.entries(data).forEach(([topic,qs])=>qs.forEach((q,i)=>flat.push({topic,q,i})));
+const total=flat.length;
+flat.forEach((item,n)=>{
+ const [question,opts,answer,skill]=item.q;
+ const box=document.createElement('div');box.className='q';
+ box.innerHTML=`<h3><span class="num">س${n+1}.</span> ${question}</h3><div class="options">${opts.map((o,j)=>`<label class="option"><input type="radio" name="q${n}" value="${j}"><span>${o}</span></label>`).join('')}</div>`;
+ host[item.topic].appendChild(box);
+});
+function updateProgress(){
+ let count=flat.filter((_,i)=>document.querySelector(`input[name="q${i}"]:checked`)).length;
+ document.getElementById('answered').textContent=`أجبت عن ${count} من ${total}`;
+ document.getElementById('percent').textContent=Math.round(count/total*100)+'%';
+ document.getElementById('bar').style.width=(count/total*100)+'%';
+}
+document.getElementById('quiz').addEventListener('change',updateProgress);
+document.getElementById('quiz').addEventListener('submit',e=>{
+ e.preventDefault();
+ const missing=flat.filter((_,i)=>!document.querySelector(`input[name="q${i}"]:checked`)).length;
+ if(missing && !confirm(`ما زال هناك ${missing} سؤال/أسئلة دون إجابة. هل تريد التصحيح الآن؟`))return;
+ const results={};Object.keys(data).forEach(k=>results[k]={correct:0,total:data[k].length,missed:[]});
+ let correct=0;
+ flat.forEach((item,n)=>{
+  const chosen=document.querySelector(`input[name="q${n}"]:checked`);
+  const got=chosen?Number(chosen.value):-1, expected=item.q[2];
+  const ok=got===expected;if(ok){correct++;results[item.topic].correct++}
+  results[item.topic].missed.push({n:n+1,question:item.q[0],chosen:got<0?"لم تتم الإجابة":item.q[1][got],right:item.q[1][expected],skill:item.q[3],ok});
+ });
+ const mark=correct/total*20, name=document.getElementById('student').value.trim()||'التلميذ';
+ document.getElementById('scoreArea').innerHTML=`<div class="score"><div class="circle">${mark.toFixed(2)}<small>/20</small></div><div><h2 style="margin:0">${name}</h2><strong>${correct} إجابة صحيحة من ${total}</strong><p>${mark>=17?'ممتاز! إتقان رائع 🌟':mark>=14?'جيد جداً، واصل المراجعة 👏':mark>=10?'مستوى متوسط، تحتاج إلى تثبيت بعض المعلومات 📖':'تحتاج إلى مراجعة مركزة وإعادة الحفظ 💪'}</p></div></div>`;
+ let topicsHTML='',reviewHTML='';
+ Object.entries(results).forEach(([key,r])=>{
+  const pct=Math.round(r.correct/r.total*100),status=pct>=80?'متقن':pct>=60?'يحتاج إلى تثبيت':'يحتاج إلى مراجعة وإعادة حفظ';
+  topicsHTML+=`<div class="topic"><div class="topichead"><span>${labels[key]}</span><span>${r.correct}/${r.total} — ${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div><span class="${pct>=80?'good':'weak'}">${status}</span></div>`;
+  if(pct<80){
+   let skills=[...new Set(r.missed.map(x=>x.skill))];
+   reviewHTML+=`<div class="review"><strong>${labels[key]} (${pct}%)</strong><br>راجع وأعد حفظ: ${skills.join('، ')}.<br><small>أخطأت في ${r.missed.length} سؤالاً من هذا الدرس.</small></div>`;
+  }
+ });
+ if(!reviewHTML)reviewHTML='<p class="good">أحسنت! حققت 80% أو أكثر في جميع الدروس. قم بمراجعة خفيفة للمحافظة على الحفظ.</p>';
+ document.getElementById('topicArea').innerHTML=topicsHTML;
+ document.getElementById('reviewArea').innerHTML=reviewHTML;
+ let details='';
+ flat.forEach((item,n)=>{
+  const r=results[item.topic].missed.find(x=>x.n===n+1);
+  if(!r.ok)details+=`<div class="topic"><strong>س${n+1} — ${labels[item.topic]}</strong><p>${r.question}</p><div class="wrong">إجابتك: ${r.chosen}</div><div class="correct">الإجابة الصحيحة: ${r.right}</div><small>المحور: ${r.skill}</small></div>`;
+ });
+ document.getElementById('details').innerHTML=details||'<p class="good">كل إجاباتك صحيحة! لا توجد أخطاء.</p>';
+ document.getElementById('result').style.display='block';
+ document.getElementById('result').scrollIntoView({behavior:'smooth'});
+});
+function retry(){
+ document.getElementById('quiz').reset();document.getElementById('result').style.display='none';updateProgress();window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('quiz').addEventListener('reset',()=>setTimeout(updateProgress,0));
+updateProgress();
+</script>
+</body>
+</html>
